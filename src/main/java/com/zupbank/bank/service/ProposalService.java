@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.persistence.EntityNotFoundException;
+
 @Service
 public class ProposalService {
 
@@ -27,6 +29,7 @@ public class ProposalService {
 
         var proposal = getProposal(clientDTO);
 
+        System.err.println("PROSTA E CLIENTE SALVOS...");
         return saveProposal(proposal);
 
     }
@@ -49,25 +52,19 @@ public class ProposalService {
         System.err.println("Registra Endereco...");
     }
 
-    public void uploadFile(byte[] file) {
+    public Proposal approveProposal(Long id) {
+        System.err.println("Chamando serviço externo de aprovação...");
+        final Proposal proposal = proposalRespository.findById(id).orElseThrow(() -> new EntityNotFoundException("Resource not found."));
 
-        System.err.println("Upload do arquivo...");
-        System.err.println("Emite evento para o aprovador gerar a conta...");
-        approveProposal(new Client());
-    }
-
-    private Proposal approveProposal(Client client) {
-        System.err.println("Chamar serviço externo de aprovação...");
-
-        Proposal proposal = new Proposal(client);
         HttpEntity<Proposal> httpEntity = new HttpEntity<Proposal>(proposal);
 
         RestTemplate restClient = new RestTemplate();
-        ResponseEntity<String> exchange = restClient.exchange("http://localhost:8081/v1/approval", HttpMethod.POST, httpEntity, String.class);
+        ResponseEntity<String> exchange = restClient.exchange("http://localhost:8081/v1/approval", HttpMethod.PUT, httpEntity, String.class);
 
-        System.err.println("REST TEMPLATE:" + exchange.getBody());
+        //TODO: retornar do Histrix
+        System.err.println("RETURN:" + exchange.getBody());
 
-        return new Proposal(client);
+        return proposal;
     }
 
     public Proposal saveProposal(Proposal proposal) {

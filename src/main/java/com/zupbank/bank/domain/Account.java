@@ -17,8 +17,8 @@ public class Account {
     private Long id;
     @NotNull
     private String number;
-    @OneToOne
-    @JoinColumn(name = "proposal_id")
+
+    @OneToOne(mappedBy = "account", fetch = FetchType.LAZY)
     private Proposal proposal;
 
     public Account() {

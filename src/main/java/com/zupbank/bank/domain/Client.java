@@ -15,6 +15,8 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
+//
+//    private CNH cnh;
 
     public Client() {
     }

@@ -30,5 +30,23 @@ create table proposal
     constraint FKj40pt9n65hvf8es8qalp2yuen foreign key (account_id) references account (id)
 );
 
+create table cnh
+(
+    client_id bigint not null
+        primary key,
+    constraint FK2kq155tst2jfbyw84t8scjt1k
+        foreign key (client_id) references client (id)
+);
+
+create table cnh_files
+(
+    cnh_client_id bigint not null,
+    content_type varchar(255) null,
+    descricao varchar(255) null,
+    nome_arquivo varchar(255) null,
+    tamanho bigint null,
+    constraint FKlavfk27cf4jc7ixa21p171ukp
+        foreign key (cnh_client_id) references cnh (client_id)
+);
 
 
