@@ -25,6 +25,9 @@ public class ProposalService {
     @Autowired
     ClientRepository clientRepository;
 
+    @Autowired
+    RestTemplate restTemplate;
+
     public Proposal registerClient(ClientDTO clientDTO) {
 
         var proposal = getProposal(clientDTO);
@@ -48,7 +51,7 @@ public class ProposalService {
     }
 
     public void registerAdress(AddressDTO address) {
-
+        //TODO: Registrar Endereco
         System.err.println("Registra Endereco...");
     }
 
@@ -58,8 +61,7 @@ public class ProposalService {
 
         HttpEntity<Proposal> httpEntity = new HttpEntity<Proposal>(proposal);
 
-        RestTemplate restClient = new RestTemplate();
-        ResponseEntity<String> exchange = restClient.exchange("http://localhost:8081/v1/approval", HttpMethod.PUT, httpEntity, String.class);
+        ResponseEntity<String> exchange = restTemplate.exchange("http://approver/v1/approval", HttpMethod.PUT, httpEntity, String.class);
 
         //TODO: retornar do Histrix
         System.err.println("RETURN:" + exchange.getBody());

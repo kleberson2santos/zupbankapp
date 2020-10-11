@@ -25,7 +25,7 @@ public class OperationsTest {
     @Test
     public void given_proposal_when_persist_then_proposal_saved() {
         Client newClient = new Client();
-        newClient.setNome("Maria");
+        newClient.setName("Maria");
 
         final Client client = clientRepository.save(newClient);
         Proposal newProposal = new Proposal(client);

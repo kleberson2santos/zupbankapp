@@ -2,14 +2,12 @@ package com.zupbank.bank.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.persistence.*;
 
 @JsonInclude(Include.NON_NULL)
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "proposal")
 public class Proposal {
@@ -19,12 +17,13 @@ public class Proposal {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "client_id") // voltar temp , nullable = false
+    @JoinColumn(name = "client_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_proposal_client"))
     private Client client;
 
-
-    @OneToOne
-    @JoinColumn(name = "acount_id")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "acount_id",
+            foreignKey = @ForeignKey(name = "fk_proposal_account"))
     private Account account;
 
     @Enumerated(EnumType.STRING)

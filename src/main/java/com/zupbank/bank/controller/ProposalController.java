@@ -1,12 +1,14 @@
 package com.zupbank.bank.controller;
 
 import com.zupbank.bank.controller.dto.ClientDTO;
+import com.zupbank.bank.domain.Account;
 import com.zupbank.bank.domain.CNH;
 import com.zupbank.bank.domain.Proposal;
 import com.zupbank.bank.domain.exception.EntidadeNaoEncontradaException;
 import com.zupbank.bank.domain.exception.NegocioException;
 import com.zupbank.bank.repository.CnhRepository;
 import com.zupbank.bank.repository.ProposalRepository;
+import com.zupbank.bank.service.AccountService;
 import com.zupbank.bank.service.ProposalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -27,13 +29,16 @@ public class ProposalController {
     private ProposalService proposalService;
 
     @Autowired
+    private AccountService accountService;
+
+    @Autowired
     private ProposalRepository proposalRepository;
 
     @Autowired
     private CnhRepository cnhRepository;
 
     @RequestMapping(method = RequestMethod.POST, path = "/request")
-    public Proposal requestProposal(@RequestBody ClientDTO client) {
+    public Proposal stepOne(@RequestBody ClientDTO client) {
         return proposalService.registerClient(client);
     }
 
@@ -45,7 +50,7 @@ public class ProposalController {
     @RequestMapping(method = RequestMethod.PUT,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             path = "/{id}")
-    public Proposal updateCNH(@PathVariable Long id,
+    public Proposal stepThree(@PathVariable Long id,
                               @RequestParam MultipartFile[] files) throws IOException {
 
         if (!proposalRepository.existsById(id)) {
@@ -87,5 +92,12 @@ public class ProposalController {
 
 //        proposalService.saveProposal(proposal);
     }
+
+    //TODO: ENDPOINT NAO VAI SER USADO EXTERNAMENTE APAGAR DEPOIS
+    @RequestMapping(method = RequestMethod.POST, path = "/{id}/accounts")
+    public Proposal saveAccount(@PathVariable Long id, @RequestBody Account account) {
+        return accountService.save(account, id);
+    }
+
 
 }
