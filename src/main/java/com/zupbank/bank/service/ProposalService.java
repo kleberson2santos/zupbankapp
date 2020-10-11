@@ -1,5 +1,6 @@
 package com.zupbank.bank.service;
 
+import com.zupbank.bank.client.ApprovalClient;
 import com.zupbank.bank.controller.dto.AddressDTO;
 import com.zupbank.bank.controller.dto.ClientDTO;
 import com.zupbank.bank.domain.Client;
@@ -7,17 +8,18 @@ import com.zupbank.bank.domain.Proposal;
 import com.zupbank.bank.repository.ClientRepository;
 import com.zupbank.bank.repository.ProposalRepository;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityNotFoundException;
 
 @Service
 public class ProposalService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ProposalService.class);
 
     @Autowired
     ProposalRepository proposalRespository;
@@ -26,15 +28,14 @@ public class ProposalService {
     ClientRepository clientRepository;
 
     @Autowired
-    RestTemplate restTemplate;
+    private ApprovalClient approvalClient;
 
     public Proposal registerClient(ClientDTO clientDTO) {
 
         var proposal = getProposal(clientDTO);
 
-        System.err.println("PROSTA E CLIENTE SALVOS...");
+        LOG.info("Salvando proposta e cliente: {} ", proposal.getClient().getName());
         return saveProposal(proposal);
-
     }
 
     private Proposal getProposal(ClientDTO clientDTO) {
@@ -56,16 +57,15 @@ public class ProposalService {
     }
 
     public Proposal approveProposal(Long id) {
-        System.err.println("Chamando serviço externo de aprovação...");
+        LOG.info("Aprovando proposta {}", id);
         final Proposal proposal = proposalRespository.findById(id).orElseThrow(() -> new EntityNotFoundException("Resource not found."));
 
         HttpEntity<Proposal> httpEntity = new HttpEntity<Proposal>(proposal);
-
-        ResponseEntity<String> exchange = restTemplate.exchange("http://approver/v1/approval", HttpMethod.PUT, httpEntity, String.class);
+//
+        final String approvalStatus = approvalClient.getApproval(proposal);
 
         //TODO: retornar do Fallback
-        System.err.println("RETURN:" + exchange.getBody());
-
+        LOG.info("Status da proposta: {}", approvalStatus);
         return proposal;
     }
 

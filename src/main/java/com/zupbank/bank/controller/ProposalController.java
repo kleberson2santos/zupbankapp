@@ -88,7 +88,6 @@ public class ProposalController {
         cnh.setFiles(cnhFiles);
         cnh.setClient(proposal.getClient());
         final CNH save = cnhRepository.save(cnh);
-        System.err.println("CNH SALVA!:" + save.getId());
 
 //        proposalService.saveProposal(proposal);
     }
