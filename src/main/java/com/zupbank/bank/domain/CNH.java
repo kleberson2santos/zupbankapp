@@ -17,7 +17,7 @@ public class CNH {
     private Long id;
 
     @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY) //TODO: Lazy proxy aqui
     @JoinColumn(name = "client_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_cnh_client"))
     private Client client;
@@ -32,9 +32,10 @@ public class CNH {
     @Embeddable
     public static class CnhFile {
         private String contentType;
-        private String nomeArquivo;
-        private String descricao;
-        private Long tamanho;
+        @Column(name = "file_name")
+        private String fileName;
+        private String description;
+        private Long size;
 
         public CnhFile() {
         }

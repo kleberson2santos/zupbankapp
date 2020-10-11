@@ -63,7 +63,7 @@ public class ProposalService {
 
         ResponseEntity<String> exchange = restTemplate.exchange("http://approver/v1/approval", HttpMethod.PUT, httpEntity, String.class);
 
-        //TODO: retornar do Histrix
+        //TODO: retornar do Fallback
         System.err.println("RETURN:" + exchange.getBody());
 
         return proposal;

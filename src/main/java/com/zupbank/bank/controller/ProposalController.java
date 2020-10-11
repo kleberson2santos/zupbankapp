@@ -69,9 +69,9 @@ public class ProposalController {
                 throw new RuntimeException(e);
             }
 
-            cnhFile.setNomeArquivo(nomeArquivo);
+            cnhFile.setFileName(nomeArquivo);
             cnhFile.setContentType(file.getContentType());
-            cnhFile.setTamanho(file.getSize());
+            cnhFile.setSize(file.getSize());
             cnhFiles.add(cnhFile);
         }
         //TODO: setar o anexo no cliente, pode ser um evento...
