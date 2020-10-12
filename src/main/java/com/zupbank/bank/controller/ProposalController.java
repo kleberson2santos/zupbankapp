@@ -4,7 +4,6 @@ import com.zupbank.bank.controller.dto.ClientDTO;
 import com.zupbank.bank.domain.Account;
 import com.zupbank.bank.domain.CNH;
 import com.zupbank.bank.domain.Proposal;
-import com.zupbank.bank.domain.exception.EntidadeNaoEncontradaException;
 import com.zupbank.bank.domain.exception.NegocioException;
 import com.zupbank.bank.repository.CnhRepository;
 import com.zupbank.bank.repository.ProposalRepository;
@@ -12,13 +11,16 @@ import com.zupbank.bank.service.AccountService;
 import com.zupbank.bank.service.ProposalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -44,15 +46,18 @@ public class ProposalController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/{id}")
     public Proposal getProposal(@PathVariable Long id) {
-        return proposalRepository.findById(id).orElseThrow(()->new EntidadeNaoEncontradaException("Entidade ou Recurso não encontrado"));
+        return proposalService.getById(id);
     }
 
     @RequestMapping(method = RequestMethod.PUT,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             path = "/{id}")
-    public Proposal stepThree(@PathVariable Long id,
-                              @RequestParam MultipartFile[] files) throws IOException {
+    public ResponseEntity<Proposal> stepThree(@PathVariable Long id,
+                                              @RequestParam MultipartFile[] files) throws IOException {
 
+        if (Arrays.stream(files).count() == 0) {
+            throw new NegocioException("Files is mandatory.");
+        }
         if (!proposalRepository.existsById(id)) {
             throw new EntityNotFoundException("Resource not found.");
         }
@@ -74,22 +79,25 @@ public class ProposalController {
             cnhFile.setSize(file.getSize());
             cnhFiles.add(cnhFile);
         }
-        //TODO: setar o anexo no cliente, pode ser um evento...
-        saveProposalWithCnh(id, cnhFiles);//poderia ser um Proposal.of()
 
-        return proposalService.approveProposal(id);
+        return ResponseEntity.of(Optional.of(saveProposalWithCnh(id, cnhFiles)));
     }
 
-    private void saveProposalWithCnh(Long id, HashSet<CNH.CnhFile> cnhFiles) {
-        final Proposal proposal = proposalRepository.findById(id)
+    private Proposal saveProposalWithCnh(Long id, HashSet<CNH.CnhFile> cnhFiles) {
+        final Proposal proposal = proposalRepository.findById(id)//deveria fazer eager no cliente
                 .orElseThrow(() -> new NegocioException("Proposal not found."));
 
-        var cnh = new CNH();
-        cnh.setFiles(cnhFiles);
-        cnh.setClient(proposal.getClient());
-        final CNH save = cnhRepository.save(cnh);
+//        final CNH cnh = cnhRepository.findAll().stream()
+//                .filter(doc -> doc.getId().equals(proposal.getClient().getId()))
+//                .findFirst()
+//                .orElse(new CNH());
+//
+//        cnh.setFiles(cnhFiles);
+//        cnh.setClient(proposal.getClient());
+//        System.err.println("SALVANDO ANEXOS...");
+//        cnhRepository.save(cnh);
 
-//        proposalService.saveProposal(proposal);
+        return proposalService.approveProposal(proposal);
     }
 
     //TODO: ENDPOINT NAO VAI SER USADO EXTERNAMENTE APAGAR DEPOIS

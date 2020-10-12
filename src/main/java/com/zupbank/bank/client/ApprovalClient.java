@@ -10,5 +10,5 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface ApprovalClient {
 
     @RequestMapping(path = "/v1/approval", method = RequestMethod.PUT)
-    String getApproval(@RequestBody Proposal proposal);
+    Proposal getApproval(@RequestBody Proposal proposal);
 }
