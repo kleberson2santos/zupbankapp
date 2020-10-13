@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -27,6 +28,14 @@ public class CNH {
     @JoinColumn(name = "cnh_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_cnh_files_cnh")))
     private Set<CnhFile> files;
+
+    public CNH(HashSet<CnhFile> cnhFiles, Client client) {
+        this.files = cnhFiles;
+        this.client = client;
+    }
+
+    public CNH() {
+    }
 
     @Data
     @Embeddable

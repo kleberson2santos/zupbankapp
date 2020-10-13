@@ -1,12 +1,13 @@
 package com.zupbank.bank.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 
 import javax.persistence.*;
 
-@JsonInclude(Include.NON_NULL)
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@JsonInclude(NON_NULL)
 @Data
 @Entity
 @Table(name = "proposal")

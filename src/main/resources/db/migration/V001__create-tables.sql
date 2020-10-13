@@ -3,18 +3,31 @@ create table account
     id     bigint not null auto_increment,
     number varchar(255),
     primary key (id)
-) engine = InnoDB;
+) engine = InnoDB
+  default charset = utf8;
 create table client
 (
-    id   bigint not null auto_increment,
-    name varchar(255),
+    id                 bigint not null auto_increment,
+    name               varchar(255),
+    lastname           varchar(255),
+    email              varchar(255),
+    cnh                varchar(255),
+    birth              date,
+    address_road       varchar(255),
+    address_cep        varchar(255),
+    address_city       varchar(255),
+    address_complement varchar(255),
+    address_district   varchar(255),
+    address_state      varchar(255),
     primary key (id)
-) engine = InnoDB;
+) engine = InnoDB
+  default charset = utf8;
 create table cnh
 (
     client_id bigint not null,
     primary key (client_id)
-) engine = InnoDB;
+) engine = InnoDB
+  default charset = utf8;
 create table cnh_files
 (
     cnh_id       bigint not null,
@@ -22,7 +35,8 @@ create table cnh_files
     description  varchar(255),
     file_name    varchar(255),
     size         bigint
-) engine = InnoDB;
+) engine = InnoDB
+  default charset = utf8;
 create table proposal
 (
     id        bigint                        not null auto_increment,
@@ -30,7 +44,8 @@ create table proposal
     acount_id bigint,
     client_id bigint                        not null,
     primary key (id)
-) engine = InnoDB;
+) engine = InnoDB
+  default charset = utf8;
 
 alter table cnh
     add constraint fk_cnh_client foreign key (client_id) references client (id);

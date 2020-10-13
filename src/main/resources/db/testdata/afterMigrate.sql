@@ -6,8 +6,8 @@ delete
 from proposal;
 delete
 from account;
-
-delete from cnh;
+delete
+from cnh;
 delete
 from cnh_files;
 
@@ -24,9 +24,10 @@ alter table cnh
 alter table cnh_files
     auto_increment = 1;
 
-insert into client (id, name)
-values (1, 'John');
-
+INSERT INTO client (id, name, lastname, email, cnh, birth, address_road, address_cep, address_city, address_complement,
+                    address_district, address_state)
+VALUES (1, 'John', 'White', 'john@gmail.com', '99988877712', date_sub(sysdate(), interval 27 year), 'Tansversal Road',
+        null, null, null, null, null);
 insert into proposal (id, status, client_id)
 values (1, 'PENDING', 1);
 

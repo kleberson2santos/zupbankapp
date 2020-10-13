@@ -1,9 +1,12 @@
 package com.zupbank.bank.controller;
 
+import com.zupbank.bank.api.ResourceUriHelper;
+import com.zupbank.bank.controller.dto.AddressDTO;
 import com.zupbank.bank.controller.dto.ClientDTO;
 import com.zupbank.bank.domain.Account;
 import com.zupbank.bank.domain.CNH;
 import com.zupbank.bank.domain.Proposal;
+import com.zupbank.bank.domain.StatusProposal;
 import com.zupbank.bank.domain.exception.NegocioException;
 import com.zupbank.bank.repository.CnhRepository;
 import com.zupbank.bank.repository.ProposalRepository;
@@ -16,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -39,9 +42,19 @@ public class ProposalController {
     @Autowired
     private CnhRepository cnhRepository;
 
-    @RequestMapping(method = RequestMethod.POST, path = "/request")
+    @RequestMapping(method = RequestMethod.POST)
     public Proposal stepOne(@RequestBody ClientDTO client) {
-        return proposalService.registerClient(client);
+        System.err.println("REQUEST");
+        final Proposal proposal = proposalService.registerClient(client);
+        ResourceUriHelper.addUriInResponseHeader(proposal.getId());
+        return proposal;
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, path = "/{id}/step-2")
+    public Proposal stepTwo(@PathVariable Long id, @RequestBody AddressDTO address) {
+        final Proposal proposal = proposalService.registerAdress(address, id);
+        ResourceUriHelper.addUriInResponseHeaderStep2(proposal.getId());
+        return proposal;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/{id}")
@@ -51,9 +64,11 @@ public class ProposalController {
 
     @RequestMapping(method = RequestMethod.PUT,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            path = "/{id}")
+            path = "/{id}/step-3")
     public ResponseEntity<Proposal> stepThree(@PathVariable Long id,
-                                              @RequestParam MultipartFile[] files) throws IOException {
+                                              @RequestParam MultipartFile[] files,
+                                              HttpServletResponse response
+    ) {
 
         if (Arrays.stream(files).count() == 0) {
             throw new NegocioException("Files is mandatory.");
@@ -62,8 +77,30 @@ public class ProposalController {
             throw new EntityNotFoundException("Resource not found.");
         }
         //TODO:validar se os passos anterirores estao completos aqui
-        var cnhFiles = new HashSet<CNH.CnhFile>();
+        final Proposal proposal = proposalRepository.findById(id)
+                .orElseThrow(() -> new NegocioException("Proposal not found."));
 
+        Proposal proposalSaved = saveCnhFiles(files, proposal);
+        final Proposal proposalApproved = approve(proposalSaved);
+        if (StatusProposal.APPROVED.equals(proposalApproved.getStatus())) {
+            ResourceUriHelper.addUriInResponseHeaderStep3(proposal.getId());
+        }
+
+        return ResponseEntity.of(Optional.of(proposalApproved));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/{id}/accounts")
+    public Proposal saveAccount(@PathVariable Long id, @RequestBody Account account) {
+        return accountService.save(account, id);
+    }
+
+    private Proposal approve(Proposal proposal) {
+        return proposalService.approveProposal(proposal);
+    }
+
+
+    private Proposal saveCnhFiles(MultipartFile[] files, Proposal proposal) {
+        var cnhFiles = new HashSet<CNH.CnhFile>();
         for (MultipartFile file : files) {
             var cnhFile = new CNH.CnhFile();
             var nomeArquivo = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
@@ -80,31 +117,13 @@ public class ProposalController {
             cnhFiles.add(cnhFile);
         }
 
-        return ResponseEntity.of(Optional.of(saveProposalWithCnh(id, cnhFiles)));
+        final CNH cnh = cnhRepository.findAll().stream()
+                .filter(doc -> doc.getId().equals(proposal.getClient().getId()))
+                .findFirst().orElse(new CNH(cnhFiles, proposal.getClient()));
+
+        cnhRepository.save(cnh);
+
+        return proposal;
     }
-
-    private Proposal saveProposalWithCnh(Long id, HashSet<CNH.CnhFile> cnhFiles) {
-        final Proposal proposal = proposalRepository.findById(id)//deveria fazer eager no cliente
-                .orElseThrow(() -> new NegocioException("Proposal not found."));
-
-//        final CNH cnh = cnhRepository.findAll().stream()
-//                .filter(doc -> doc.getId().equals(proposal.getClient().getId()))
-//                .findFirst()
-//                .orElse(new CNH());
-//
-//        cnh.setFiles(cnhFiles);
-//        cnh.setClient(proposal.getClient());
-//        System.err.println("SALVANDO ANEXOS...");
-//        cnhRepository.save(cnh);
-
-        return proposalService.approveProposal(proposal);
-    }
-
-    //TODO: ENDPOINT NAO VAI SER USADO EXTERNAMENTE APAGAR DEPOIS
-    @RequestMapping(method = RequestMethod.POST, path = "/{id}/accounts")
-    public Proposal saveAccount(@PathVariable Long id, @RequestBody Account account) {
-        return accountService.save(account, id);
-    }
-
 
 }

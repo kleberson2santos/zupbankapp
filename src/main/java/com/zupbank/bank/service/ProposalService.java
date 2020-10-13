@@ -4,6 +4,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.zupbank.bank.client.ApprovalClient;
 import com.zupbank.bank.controller.dto.AddressDTO;
 import com.zupbank.bank.controller.dto.ClientDTO;
+import com.zupbank.bank.domain.Address;
 import com.zupbank.bank.domain.Client;
 import com.zupbank.bank.domain.Proposal;
 import com.zupbank.bank.domain.exception.EntidadeNaoEncontradaException;
@@ -14,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.persistence.EntityNotFoundException;
 
 @Service
 public class ProposalService {
@@ -28,6 +31,9 @@ public class ProposalService {
 
     @Autowired
     private ApprovalClient approvalClient;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     public Proposal registerClient(ClientDTO clientDTO) {
 
@@ -50,9 +56,13 @@ public class ProposalService {
         return mapper.map(clientDTO, Client.class);
     }
 
-    public void registerAdress(AddressDTO address) {
-        //TODO: Registrar Endereco
-        System.err.println("Registra Endereco...");
+    public Proposal registerAdress(AddressDTO addressDTO, Long idProposal) {
+        Proposal proposal = proposalRepository.findById(idProposal)
+                .orElseThrow(() -> new EntityNotFoundException());
+
+        Address address = addressToEntity(addressDTO);
+        proposal.getClient().setAddress(address);
+        return proposalRepository.save(proposal);
     }
 
     @HystrixCommand(threadPoolKey = "getByIdThreatPool")
@@ -86,6 +96,10 @@ public class ProposalService {
 
     public Proposal saveProposal(Proposal proposal) {
         return proposalRepository.save(proposal);
+    }
+
+    private Address addressToEntity(AddressDTO addressDTO) {
+        return modelMapper.map(addressDTO, Address.class);
     }
 
 }

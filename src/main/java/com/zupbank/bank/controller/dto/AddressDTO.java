@@ -8,10 +8,10 @@ import lombok.Setter;
 public class AddressDTO {
 
     private String cep;
-    private String rua;
-    private String bairro;
-    private String complemento;
-    private String cidade;
-    private String estado;
+    private String road;
+    private String district;
+    private String complement;
+    private String city;
+    private String state;
 
 }

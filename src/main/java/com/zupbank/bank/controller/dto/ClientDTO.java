@@ -9,10 +9,12 @@ import java.time.LocalDate;
 @Setter
 public class ClientDTO {
 
-    private String nome;
-    private String sobrenome;
+    private Long id;
+    private String name;
+    private String lastname;
     private String email;
     private String cnh;
-    private LocalDate dataNascimento;
+    private LocalDate birth;
+    private AddressDTO address;
 
 }
