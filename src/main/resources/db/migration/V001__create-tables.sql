@@ -39,10 +39,11 @@ create table cnh_files
   default charset = utf8;
 create table proposal
 (
-    id        bigint                        not null auto_increment,
-    status    varchar(32) default 'PENDING' not null,
+    id        bigint                          not null auto_increment,
+    status    varchar(32) default 'PENDING'   not null,
+    accept    varchar(32) default 'TO_ACCEPT' not null,
     acount_id bigint,
-    client_id bigint                        not null,
+    client_id bigint                          not null,
     primary key (id)
 ) engine = InnoDB
   default charset = utf8;

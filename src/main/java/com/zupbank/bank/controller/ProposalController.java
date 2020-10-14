@@ -3,11 +3,9 @@ package com.zupbank.bank.controller;
 import com.zupbank.bank.api.ResourceUriHelper;
 import com.zupbank.bank.controller.dto.AddressDTO;
 import com.zupbank.bank.controller.dto.ClientDTO;
-import com.zupbank.bank.domain.Account;
-import com.zupbank.bank.domain.CNH;
-import com.zupbank.bank.domain.Proposal;
-import com.zupbank.bank.domain.StatusProposal;
 import com.zupbank.bank.domain.exception.NegocioException;
+import com.zupbank.bank.domain.model.CNH;
+import com.zupbank.bank.domain.model.Proposal;
 import com.zupbank.bank.repository.CnhRepository;
 import com.zupbank.bank.repository.ProposalRepository;
 import com.zupbank.bank.service.AccountService;
@@ -44,7 +42,6 @@ public class ProposalController {
 
     @RequestMapping(method = RequestMethod.POST)
     public Proposal stepOne(@RequestBody ClientDTO client) {
-        System.err.println("REQUEST");
         final Proposal proposal = proposalService.registerClient(client);
         ResourceUriHelper.addUriInResponseHeader(proposal.getId());
         return proposal;
@@ -59,7 +56,7 @@ public class ProposalController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/{id}")
     public Proposal getProposal(@PathVariable Long id) {
-        return proposalService.getById(id);
+        return proposalService.getProposalById(id);
     }
 
     @RequestMapping(method = RequestMethod.PUT,
@@ -81,18 +78,32 @@ public class ProposalController {
                 .orElseThrow(() -> new NegocioException("Proposal not found."));
 
         Proposal proposalSaved = saveCnhFiles(files, proposal);
-        final Proposal proposalApproved = approve(proposalSaved);
-        if (StatusProposal.APPROVED.equals(proposalApproved.getStatus())) {
-            ResourceUriHelper.addUriInResponseHeaderStep3(proposal.getId());
-        }
+//        final Proposal proposalApproved = approve(proposalSaved);
+//        if (StatusProposal.APPROVED.equals(proposalApproved.getStatus())) {
+//            ResourceUriHelper.addUriInResponseHeaderStep3(proposal.getId());
+//        }
 
-        return ResponseEntity.of(Optional.of(proposalApproved));
+
+        ResourceUriHelper.addUriInResponseHeaderStep3(proposal.getId());
+
+        return ResponseEntity.of(Optional.of(proposalSaved));
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/{id}/accounts")
-    public Proposal saveAccount(@PathVariable Long id, @RequestBody Account account) {
-        return accountService.save(account, id);
+    @RequestMapping(method = RequestMethod.PUT, path = "/{id}/accept")
+    public Proposal acceptProposal(@PathVariable Long id) {
+        final Proposal proposal = proposalService.accept(id);
+
+
+        final Proposal proposalApproved = approve(proposal);
+        ResourceUriHelper.addUriInResponseHeaderToAccept(proposal.getId());
+
+        return proposalApproved;
     }
+
+//    @RequestMapping(method = RequestMethod.POST, path = "/{id}/accounts")
+//    public Proposal saveAccount(@PathVariable Long id, @RequestBody Account account) {
+//        return accountService.save(account, id);
+//    }
 
     private Proposal approve(Proposal proposal) {
         return proposalService.approveProposal(proposal);

@@ -1,8 +1,8 @@
 package com.zupbank.bank.persistence;
 
-import com.zupbank.bank.domain.Account;
-import com.zupbank.bank.domain.Client;
-import com.zupbank.bank.domain.Proposal;
+import com.zupbank.bank.domain.model.Account;
+import com.zupbank.bank.domain.model.Client;
+import com.zupbank.bank.domain.model.Proposal;
 import com.zupbank.bank.repository.ClientRepository;
 import com.zupbank.bank.repository.ProposalRepository;
 import org.junit.jupiter.api.Assertions;

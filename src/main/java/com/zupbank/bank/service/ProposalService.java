@@ -4,10 +4,11 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.zupbank.bank.client.ApprovalClient;
 import com.zupbank.bank.controller.dto.AddressDTO;
 import com.zupbank.bank.controller.dto.ClientDTO;
-import com.zupbank.bank.domain.Address;
-import com.zupbank.bank.domain.Client;
-import com.zupbank.bank.domain.Proposal;
 import com.zupbank.bank.domain.exception.EntidadeNaoEncontradaException;
+import com.zupbank.bank.domain.model.Address;
+import com.zupbank.bank.domain.model.Client;
+import com.zupbank.bank.domain.model.Proposal;
+import com.zupbank.bank.domain.model.StatusProposal;
 import com.zupbank.bank.repository.ClientRepository;
 import com.zupbank.bank.repository.ProposalRepository;
 import org.modelmapper.ModelMapper;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -66,32 +68,33 @@ public class ProposalService {
     }
 
     @HystrixCommand(threadPoolKey = "getByIdThreatPool")
-    public Proposal getById(Long id) {
+    public Proposal getProposalById(Long id) {
         return proposalRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Entidade ou Recurso não encontrado"));
     }
 
-    //    @HystrixCommand
-//            (
-////                    fallbackMethod = "approveProposalFallback",
+    //    @HystrixCommand(
+//            allbackMethod = "approveProposalFallback",
 //            threadPoolKey = "approveProposalThreadPool")
     public Proposal approveProposal(Proposal proposal) {
-        LOG.info("TENTANDO APROVAR {}", proposal.getId());
+        LOG.info("TENTATIVA DE APROVAÇÃO PARA A PROPOSTA {}", proposal.getId());
 //        final CNH cnhUploaded = uploadClient.upFiles(files);
         var proposalApproved = approvalClient.getApproval(proposal);
-        LOG.info("PROPOSTA {}!", proposalApproved.getStatus());
-        return proposalRepository.save(proposalApproved);
+        proposalApproved.setAccept(proposal.getAccept());
+
+        final Proposal proposalSaved = proposalRepository.save(proposalApproved);
+
+        return proposalSaved;
 
 //        final Account accountCreated = accountClient.createAccount(proposalApproved);
 
     }
 
     public Proposal approveProposalFallback(Proposal proposal) {
-        LOG.info("ENVIANDO FALLBACK");
-//        if (StatusProposal.APPROVED.equals(proposal.getStatus())) {
-        return proposalRepository.findById(proposal.getId()).get();
-//        }
-//        proposal.setStatus(StatusProposal.PENDING);
-//        return proposal;
+        if (StatusProposal.APPROVED.equals(proposal.getStatus())) {
+            return proposalRepository.findById(proposal.getId()).get();
+        }
+        proposal.setStatus(StatusProposal.PENDING);
+        return proposal;
     }
 
     public Proposal saveProposal(Proposal proposal) {
@@ -102,4 +105,10 @@ public class ProposalService {
         return modelMapper.map(addressDTO, Address.class);
     }
 
+    @Transactional
+    public Proposal accept(Long id) {
+        var proposal = getProposalById(id);
+        proposal.accepted();
+        return proposalRepository.save(proposal);
+    }
 }

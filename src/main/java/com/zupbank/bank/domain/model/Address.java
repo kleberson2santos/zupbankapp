@@ -1,4 +1,4 @@
-package com.zupbank.bank.domain;
+package com.zupbank.bank.domain.model;
 
 import lombok.Data;
 

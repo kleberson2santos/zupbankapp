@@ -28,7 +28,17 @@ INSERT INTO client (id, name, lastname, email, cnh, birth, address_road, address
                     address_district, address_state)
 VALUES (1, 'John', 'White', 'john@gmail.com', '99988877712', date_sub(sysdate(), interval 27 year), 'Tansversal Road',
         null, null, null, null, null);
-insert into proposal (id, status, client_id)
-values (1, 'PENDING', 1);
+INSERT INTO client (id, name, lastname, email, cnh, birth, address_road, address_cep, address_city, address_complement,
+                    address_district, address_state)
+VALUES (2, 'Zulu', 'Silva', 'kleberson2santos@gmail.com', '99988877712', date_sub(sysdate(), interval 18 year),
+        'Avenida Paulista',
+        null, null, null, null, null);
+
+
+insert into proposal (id, status, accept, client_id)
+values (1, 'PENDING', 'TO_ACCEPT', 1);
+
+insert into proposal (id, status, accept, client_id)
+values (2, 'PENDING', 'TO_ACCEPT', 2);
 
 

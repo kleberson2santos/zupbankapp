@@ -36,14 +36,21 @@ public class ResourceUriHelper {
 
     public static void addUriInResponseHeaderStep3(Object resourceId) {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .replacePath("v1/proposals/{id}/accounts")
+                .replacePath("v1/proposals/{id}/accept")
                 .buildAndExpand(resourceId).toUri();
 
         HttpServletResponse response = ((ServletRequestAttributes)
                 RequestContextHolder.getRequestAttributes()).getResponse();
-//        System.err.println("STATUS:"+HttpStatus.valueOf(response.getStatus()));
-//        if (HttpStatus.OK.value() == response.getStatus()) {
         response.setHeader(HttpHeaders.LOCATION, uri.toString());
-//        }
+    }
+
+    public static void addUriInResponseHeaderToAccept(Object resourceId) {
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .replacePath("v1/proposals/{id}")
+                .buildAndExpand(resourceId).toUri();
+
+        HttpServletResponse response = ((ServletRequestAttributes)
+                RequestContextHolder.getRequestAttributes()).getResponse();
+        response.setHeader(HttpHeaders.LOCATION, uri.toString());
     }
 }

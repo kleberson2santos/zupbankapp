@@ -1,8 +1,8 @@
 package com.zupbank.bank.service;
 
-import com.zupbank.bank.domain.Account;
-import com.zupbank.bank.domain.Proposal;
 import com.zupbank.bank.domain.exception.EntidadeNaoEncontradaException;
+import com.zupbank.bank.domain.model.Account;
+import com.zupbank.bank.domain.model.Proposal;
 import com.zupbank.bank.repository.ProposalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

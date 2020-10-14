@@ -1,6 +1,6 @@
 package com.zupbank.bank.repository;
 
-import com.zupbank.bank.domain.Proposal;
+import com.zupbank.bank.domain.model.Proposal;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
