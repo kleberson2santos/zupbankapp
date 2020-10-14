@@ -1,10 +1,12 @@
 create table account
 (
-    id        bigint not null auto_increment,
+    id        bigint  not null auto_increment,
     agency    int(4),
+    token     varchar(6),
     account   int(8),
     bank_code int(3),
-    sale      decimal(10, 2) default 0,
+    enabled   boolean not null default 0,
+    sale      decimal(10, 2)   default 0,
     primary key (id)
 ) engine = InnoDB
   default charset = utf8;
@@ -51,6 +53,16 @@ create table proposal
 ) engine = InnoDB
   default charset = utf8;
 
+create table verification_token
+(
+    id          bigint not null auto_increment,
+    expiry_date datetime,
+    token       varchar(8),
+    account_id  bigint not null,
+    primary key (id)
+) engine = InnoDB
+  default charset = utf8;
+
 alter table cnh
     add constraint fk_cnh_client foreign key (client_id) references client (id);
 alter table cnh_files
@@ -59,3 +71,5 @@ alter table proposal
     add constraint fk_proposal_account foreign key (acount_id) references account (id);
 alter table proposal
     add constraint fk_proposal_client foreign key (client_id) references client (id);
+alter table verification_token
+    add constraint fk_verification_token_client foreign key (account_id) references account (id)

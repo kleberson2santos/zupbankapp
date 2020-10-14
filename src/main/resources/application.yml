@@ -12,6 +12,9 @@ spring:
     properties:
       hibernate:
         show_sql=true:
+  #    generate-ddl: true
+  #    hibernate:
+  #      ddl-auto: create
   mail:
     host: smtp.sendgrid.net
     port: 587
@@ -21,6 +24,4 @@ zupbank:
   email:
     remetente: ZupBank <naoresponder@zupbank.com.br>
     impl: smtp
-#    generate-ddl: true
-#    hibernate:
-#      ddl-auto: create
+

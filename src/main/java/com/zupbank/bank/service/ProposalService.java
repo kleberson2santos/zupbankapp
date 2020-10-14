@@ -69,31 +69,6 @@ public class ProposalService {
         return proposalRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Entidade ou Recurso não encontrado"));
     }
 
-    //    @HystrixCommand(
-//            allbackMethod = "approveProposalFallback",
-//            threadPoolKey = "approveProposalThreadPool")
-    public Proposal approveProposal(Proposal proposal) {
-        LOG.info("TENTATIVA DE APROVAÇÃO PARA A PROPOSTA {}", proposal.getId());
-//        final CNH cnhUploaded = uploadClient.upFiles(files);
-        var proposalApproved = approvalClient.getApproval(proposal);
-        proposalApproved.setAccept(proposal.getAccept());
-
-        var account = new Account();
-        proposalApproved.createAccount(account);
-        return proposalRepository.save(proposalApproved);
-
-//        final Account accountCreated = accountClient.createAccount(proposalApproved);
-
-    }
-
-    public Proposal approveProposalFallback(Proposal proposal) {
-        if (StatusProposal.APPROVED.equals(proposal.getStatus())) {
-            return proposalRepository.findById(proposal.getId()).get();
-        }
-        proposal.setStatus(StatusProposal.PENDING);
-        return proposal;
-    }
-
     public Proposal saveProposal(Proposal proposal) {
         return proposalRepository.save(proposal);
     }
@@ -107,6 +82,28 @@ public class ProposalService {
         var proposal = getProposalById(id);
         proposal.accepted();
         return proposalRepository.save(proposal);
+    }
+
+    /*@HystrixCommand(
+            allbackMethod = "approveProposalFallback",
+            threadPoolKey = "approveProposalThreadPool")*/
+    @Transactional
+    public Proposal approve(Proposal proposal) {
+        var proposalApproved = approvalClient.getApproval(proposal);
+        proposalApproved.setAccept(proposal.getAccept()); //TODO: verificar necessidade
+
+        proposalApproved.createAccount(new Account());
+
+        return proposalRepository.save(proposalApproved);
+
+    }
+
+    public Proposal approveProposalFallback(Proposal proposal) {
+        if (StatusProposal.APPROVED.equals(proposal.getStatus())) {
+            return proposalRepository.findById(proposal.getId()).get();
+        }
+        proposal.setStatus(StatusProposal.PENDING);
+        return proposal;
     }
 
 }

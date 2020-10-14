@@ -46,7 +46,7 @@ public class ResourceUriHelper {
 
     public static void addUriInResponseHeaderToAccept(Object resourceId) {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .replacePath("v1/proposals/{id}")
+                .replacePath("v1/accounts/first-access")
                 .buildAndExpand(resourceId).toUri();
 
         HttpServletResponse response = ((ServletRequestAttributes)

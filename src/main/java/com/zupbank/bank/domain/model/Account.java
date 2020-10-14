@@ -19,10 +19,19 @@ public class Account {
     private String agency;
 
     @JsonIgnore
+    //TODO:validar tamanho de 6 digitos;
+    private String token;
+
+    @JsonIgnore
     @OneToOne(mappedBy = "account", fetch = FetchType.LAZY)
     private Proposal proposal;
 
+    @Column
+    private boolean enabled;
+
     public Account() {
         this.agency = String.valueOf(100 + (int) (Math.random() * ((999 - 100) + 1)));
+//        this.token = String.valueOf(100000 + (int) (Math.random() * ((999999 - 100000) + 1)));
+        this.enabled = false;
     }
 }

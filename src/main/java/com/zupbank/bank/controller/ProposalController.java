@@ -8,7 +8,7 @@ import com.zupbank.bank.domain.model.CNH;
 import com.zupbank.bank.domain.model.Proposal;
 import com.zupbank.bank.repository.CnhRepository;
 import com.zupbank.bank.repository.ProposalRepository;
-import com.zupbank.bank.service.AccountService;
+import com.zupbank.bank.service.IAccountService;
 import com.zupbank.bank.service.ProposalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,7 +31,7 @@ public class ProposalController {
     private ProposalService proposalService;
 
     @Autowired
-    private AccountService accountService;
+    private IAccountService IAccountService;
 
     @Autowired
     private ProposalRepository proposalRepository;
@@ -47,26 +46,15 @@ public class ProposalController {
         return proposal;
     }
 
-    @RequestMapping(method = RequestMethod.PUT, path = "/{id}/step-2")
+    @RequestMapping(path = "/{id}/step-2", method = RequestMethod.PUT)
     public Proposal stepTwo(@PathVariable Long id, @RequestBody AddressDTO address) {
-        final Proposal proposal = proposalService.registerAdress(address, id);
+        var proposal = proposalService.registerAdress(address, id);
         ResourceUriHelper.addUriInResponseHeaderStep2(proposal.getId());
         return proposal;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/{id}")
-    public Proposal getProposal(@PathVariable Long id) {
-        return proposalService.getProposalById(id);
-    }
-
-    @RequestMapping(method = RequestMethod.PUT,
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            path = "/{id}/step-3")
-    public ResponseEntity<Proposal> stepThree(@PathVariable Long id,
-                                              @RequestParam MultipartFile[] files,
-                                              HttpServletResponse response
-    ) {
-
+    @RequestMapping(path = "/{id}/step-3", method = RequestMethod.PUT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Proposal> stepThree(@PathVariable Long id, @RequestParam MultipartFile[] files) {
         if (Arrays.stream(files).count() == 0) {
             throw new NegocioException("Files is mandatory.");
         }
@@ -78,43 +66,32 @@ public class ProposalController {
                 .orElseThrow(() -> new NegocioException("Proposal not found."));
 
         Proposal proposalSaved = saveCnhFiles(files, proposal);
-//        final Proposal proposalApproved = approve(proposalSaved);
-//        if (StatusProposal.APPROVED.equals(proposalApproved.getStatus())) {
-//            ResourceUriHelper.addUriInResponseHeaderStep3(proposal.getId());
-//        }
-
 
         ResourceUriHelper.addUriInResponseHeaderStep3(proposal.getId());
 
         return ResponseEntity.of(Optional.of(proposalSaved));
     }
 
-    @RequestMapping(method = RequestMethod.PUT, path = "/{id}/accept")
+    @RequestMapping(path = "/{id}/accept", method = RequestMethod.PUT)
     public Proposal acceptProposal(@PathVariable Long id) {
-        final Proposal proposal = proposalService.accept(id);
-
-
-        final Proposal proposalApproved = approve(proposal);
+        final Proposal proposal = proposalService.accept(id); // EventListener
+        //TODO: deveria ser um event para nao bloquear request
+        final Proposal proposalApproved = proposalService.approve(proposal); // TransactionalEventListener
         ResourceUriHelper.addUriInResponseHeaderToAccept(proposal.getId());
-
         return proposalApproved;
     }
 
-//    @RequestMapping(method = RequestMethod.POST, path = "/{id}/accounts")
-//    public Proposal saveAccount(@PathVariable Long id, @RequestBody Account account) {
-//        return accountService.save(account, id);
-//    }
-
-    private Proposal approve(Proposal proposal) {
-        return proposalService.approveProposal(proposal);
+    @RequestMapping(method = RequestMethod.GET, path = "/{id}")
+    public Proposal getProposal(@PathVariable Long id) {
+        return proposalService.getProposalById(id);
     }
-
 
     private Proposal saveCnhFiles(MultipartFile[] files, Proposal proposal) {
         var cnhFiles = new HashSet<CNH.CnhFile>();
         for (MultipartFile file : files) {
             var cnhFile = new CNH.CnhFile();
             var nomeArquivo = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            //TODO: Alterar caminho em producao
             var arquivoFoto = Path.of("C:\\Users\\Kleberson\\catalogo", nomeArquivo);
             try {
                 file.transferTo(arquivoFoto);
@@ -128,12 +105,11 @@ public class ProposalController {
             cnhFiles.add(cnhFile);
         }
 
-        final CNH cnh = cnhRepository.findAll().stream()
+        var cnh = cnhRepository.findAll().stream()
                 .filter(doc -> doc.getId().equals(proposal.getClient().getId()))
                 .findFirst().orElse(new CNH(cnhFiles, proposal.getClient()));
 
         cnhRepository.save(cnh);
-
         return proposal;
     }
 
