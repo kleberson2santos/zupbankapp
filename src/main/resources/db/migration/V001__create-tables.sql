@@ -1,7 +1,10 @@
 create table account
 (
-    id     bigint not null auto_increment,
-    number varchar(255),
+    id        bigint not null auto_increment,
+    agency    int(4),
+    account   int(8),
+    bank_code int(3),
+    sale      decimal(10, 2) default 0,
     primary key (id)
 ) engine = InnoDB
   default charset = utf8;

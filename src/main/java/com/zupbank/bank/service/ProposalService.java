@@ -5,10 +5,7 @@ import com.zupbank.bank.client.ApprovalClient;
 import com.zupbank.bank.controller.dto.AddressDTO;
 import com.zupbank.bank.controller.dto.ClientDTO;
 import com.zupbank.bank.domain.exception.EntidadeNaoEncontradaException;
-import com.zupbank.bank.domain.model.Address;
-import com.zupbank.bank.domain.model.Client;
-import com.zupbank.bank.domain.model.Proposal;
-import com.zupbank.bank.domain.model.StatusProposal;
+import com.zupbank.bank.domain.model.*;
 import com.zupbank.bank.repository.ClientRepository;
 import com.zupbank.bank.repository.ProposalRepository;
 import org.modelmapper.ModelMapper;
@@ -60,7 +57,7 @@ public class ProposalService {
 
     public Proposal registerAdress(AddressDTO addressDTO, Long idProposal) {
         Proposal proposal = proposalRepository.findById(idProposal)
-                .orElseThrow(() -> new EntityNotFoundException());
+                .orElseThrow(EntityNotFoundException::new);
 
         Address address = addressToEntity(addressDTO);
         proposal.getClient().setAddress(address);
@@ -81,9 +78,9 @@ public class ProposalService {
         var proposalApproved = approvalClient.getApproval(proposal);
         proposalApproved.setAccept(proposal.getAccept());
 
-        final Proposal proposalSaved = proposalRepository.save(proposalApproved);
-
-        return proposalSaved;
+        var account = new Account();
+        proposalApproved.createAccount(account);
+        return proposalRepository.save(proposalApproved);
 
 //        final Account accountCreated = accountClient.createAccount(proposalApproved);
 
@@ -111,4 +108,5 @@ public class ProposalService {
         proposal.accepted();
         return proposalRepository.save(proposal);
     }
+
 }

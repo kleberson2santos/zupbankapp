@@ -2,6 +2,7 @@ package com.zupbank.bank.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.zupbank.bank.domain.event.ProposalAcceptedEvent;
+import com.zupbank.bank.domain.event.ProposalAccountCreatedEvent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.domain.AbstractAggregateRoot;
@@ -52,7 +53,13 @@ public class Proposal extends AbstractAggregateRoot<Proposal> {
         setAccept(StatusAccept.ACCEPTED);
 
         registerEvent(new ProposalAcceptedEvent(this));
-        System.err.println("REGISTRANDO EVENTO ACEITACAO");
+    }
+
+    public void createAccount(Account account) {
+
+        setAccount(account);
+
+        registerEvent(new ProposalAccountCreatedEvent(this));
     }
 
 }

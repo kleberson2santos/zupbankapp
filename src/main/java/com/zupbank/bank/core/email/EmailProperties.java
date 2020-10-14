@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class EmailProperties {
 
     //Fake será o valor default
-    private Implementacao impl = Implementacao.SMTP;
+    private Implementacao impl = Implementacao.FAKE;
 
     private String remetente;
 

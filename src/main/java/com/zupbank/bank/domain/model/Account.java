@@ -16,12 +16,13 @@ public class Account {
     private Long id;
 
     @NotNull
-    private String number;
+    private String agency;
 
     @JsonIgnore
     @OneToOne(mappedBy = "account", fetch = FetchType.LAZY)
     private Proposal proposal;
 
     public Account() {
+        this.agency = String.valueOf(100 + (int) (Math.random() * ((999 - 100) + 1)));
     }
 }

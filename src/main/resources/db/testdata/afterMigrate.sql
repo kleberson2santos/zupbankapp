@@ -30,7 +30,7 @@ VALUES (1, 'John', 'White', 'john@gmail.com', '99988877712', date_sub(sysdate(),
         null, null, null, null, null);
 INSERT INTO client (id, name, lastname, email, cnh, birth, address_road, address_cep, address_city, address_complement,
                     address_district, address_state)
-VALUES (2, 'Zulu', 'Silva', 'kleberson2santos@gmail.com', '99988877712', date_sub(sysdate(), interval 18 year),
+VALUES (2, 'Kleberson', 'Santos', 'kleberson2santos@gmail.com', '99988877712', date_sub(sysdate(), interval 18 year),
         'Avenida Paulista',
         null, null, null, null, null);
 
