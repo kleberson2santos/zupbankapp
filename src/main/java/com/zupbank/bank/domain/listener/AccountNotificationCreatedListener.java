@@ -18,7 +18,6 @@ public class AccountNotificationCreatedListener {
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void aoAceitarPropostaCriarConta(ProposalAccountCreatedEvent event) {
-        System.err.println(">>CONTA CRIADA -> ENVIAR LINK PRIMEIRO ACESSO...");
         final Proposal proposal = event.getProposal();
 
         var mensagem = Mensagem.builder()

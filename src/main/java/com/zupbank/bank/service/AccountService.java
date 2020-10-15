@@ -1,11 +1,11 @@
 package com.zupbank.bank.service;
 
 import com.zupbank.bank.controller.dto.AccountDto;
+import com.zupbank.bank.domain.VerificationToken;
 import com.zupbank.bank.domain.exception.AccountAlreadyExistException;
 import com.zupbank.bank.domain.exception.EntidadeNaoEncontradaException;
 import com.zupbank.bank.domain.model.Account;
 import com.zupbank.bank.domain.model.Proposal;
-import com.zupbank.bank.domain.model.VerificationToken;
 import com.zupbank.bank.repository.ClientRepository;
 import com.zupbank.bank.repository.ProposalRepository;
 import com.zupbank.bank.repository.VerificationTokenRepository;
@@ -24,11 +24,11 @@ public class AccountService implements IAccountService {
     private ClientRepository clientRepository;
 
     @Autowired
-    private VerificationTokenRepository tokenRepository;
+    private VerificationTokenRepository verificationTokenRepository;
 
     /*@Transactional*/
     @Override
-    public Account registerNewUserAccount(AccountDto accountDto)
+    public Account registerNewUserAccountAccount(AccountDto accountDto)
             throws AccountAlreadyExistException {
 
         if (emailExists(accountDto.getEmail())) {
@@ -49,7 +49,7 @@ public class AccountService implements IAccountService {
     @Override
     public void createVerificationToken(Account account, String token) {
         VerificationToken myToken = new VerificationToken(token, account);
-        tokenRepository.save(myToken);
+        verificationTokenRepository.save(myToken);
     }
 
     private boolean emailExists(String email) {

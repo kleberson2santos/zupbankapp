@@ -3,7 +3,7 @@ package com.zupbank.bank.controller.dto;
 import com.zupbank.bank.controller.input.ClientInput;
 import com.zupbank.bank.domain.event.OnRegistrationCompleteEvent;
 import com.zupbank.bank.domain.exception.EntidadeNaoEncontradaException;
-import com.zupbank.bank.repository.AccountRespository;
+import com.zupbank.bank.repository.AccountRepository;
 import com.zupbank.bank.service.AccountService;
 import com.zupbank.bank.service.EnvioEmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +19,16 @@ public class AccountController {
     @Autowired
     EnvioEmailService envioEmailService;
 
-    @Autowired
-    AccountRespository accountRespository;
 
     @Autowired
     AccountService accountService;
 
     @Autowired
     ApplicationEventPublisher eventPublisher;
+
+
+    @Autowired
+    private AccountRepository accountRespository;
 
 
     //TODO: Endpoint Aberto ou Authenticado?

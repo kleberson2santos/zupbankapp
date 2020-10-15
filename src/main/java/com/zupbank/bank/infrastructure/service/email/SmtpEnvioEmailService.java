@@ -23,15 +23,12 @@ public class SmtpEnvioEmailService implements EnvioEmailService {
     @Override
     public void enviar(Mensagem mensagem) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
-        System.err.println(" Enviar Email...");
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
             helper.setTo(mensagem.getDestinatarios().toArray(new String[0]));
             helper.setFrom(emailProperties.getRemetente());
             helper.setSubject(mensagem.getAssunto());
             helper.setText(mensagem.getCorpo(), true);
-            System.err.println("From:" + emailProperties.getRemetente());
-            System.err.println("To:" + mensagem.getDestinatarios().stream().findFirst().get());
 
         } catch (Exception e) {
             throw new EmailException("Não foi possível enviar e-mail", e);
