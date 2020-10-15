@@ -1,8 +1,0 @@
-spring:
-    application:
-        name: bank
-    cloud:
-        config:
-            uri: http://localhost:8888
-    profiles:
-        active: default

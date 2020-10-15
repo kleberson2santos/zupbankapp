@@ -1,0 +1,49 @@
+server:
+  port: 5555
+
+spring:
+  cloud:
+    loadbalancer:
+      retry:
+        enabled: true
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    lease-renewal-interval-in-seconds: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "routes"
+zuul:
+  prefix: /api
+  retryable: true
+  ribbonIsolationStrategy: thread
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 9000
+
+bank:
+  ribbon:
+    listOfServers: localhost:8080
+    ServerListRefreshInterval: 100
+    retryableStatusCodes: 500, 503
+    MaxAutoRetries: 2
+    MaxAutoRetriesNextServer: 0
+    OkToRetryOnAllOperations: true
+    ReadTimeout: 5000
+    ConnectTimeout: 5000
+    EnablePrimeConnections: true
+
